@@ -36,4 +36,5 @@ SRCS += \
   ./watch-faces/complication/tarot_face.c \
   ./watch-faces/complication/kitchen_conversions_face.c \
   ./watch-faces/complication/periodic_table_face.c \
+  ./watch-faces/sensor/step_counter_face.c \
 # New watch faces go above this line.
