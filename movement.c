@@ -780,6 +780,7 @@ void app_setup(void) {
 
             // Enable the interrupts...
             lis2dw_enable_interrupts();
+            lis2dw_enable_fifo();
 
             // At first boot, this next line sets the accelerometer's sampling rate to 0, which is LIS2DW_DATA_RATE_POWERDOWN.
             // This means the interrupts we just configured won't fire.

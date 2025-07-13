@@ -51,7 +51,7 @@ static void _activity_logging_face_update_display(activity_logging_state_t *stat
         // get day of month for today - display_index
         uint32_t unixtime = watch_utility_date_time_to_unix_time(timestamp, movement_get_current_timezone_offset());
         unixtime -= 86400 * state->display_index;
-        timestamp = watch_utility_date_time_from_unix_time(unixtime, movement_get_current_timezone_offset());    
+        timestamp = watch_utility_date_time_from_unix_time(unixtime, movement_get_current_timezone_offset());
 
         // display date
         snprintf(buf, 8, "%2d", timestamp.unit.day);
@@ -138,11 +138,36 @@ movement_watch_face_advisory_t activity_logging_face_advise(void *context) {
     movement_watch_face_advisory_t retval = { 0 };
 
     if (!HAL_GPIO_A4_read()) {
+
+        // watch_enable_i2c();
         // only count this as an active minute if the previous minute was also active.
         // otherwise, set the flag and we'll count the next minute if the wearer is still active.
-        if (state->previous_minute_was_active) state->active_minutes_today++;
+        printf("Activity logging: active minute detected\n\r");
+        lis2dw_fifo_t fifo;
+        lis2dw_read_fifo(&fifo);
+        if (fifo.count > 0) {
+            // we have a reading, so we are active
+            printf("Activity logging: %d readings in FIFO\n\r", fifo.count);
+            for (uint8_t i = 0; i < fifo.count; i++) {
+                printf("FIFO reading %d: x=%d, y=%d, z=%d\n\r",
+                    i,
+                    fifo.readings[i].x,
+                    fifo.readings[i].y,
+                    fifo.readings[i].z
+                );
+            }
+        } else {
+            // no readings, so we are not active
+            printf("Activity logging: no readings in FIFO\n\r");
+        }
+        if (state->previous_minute_was_active) {
+            state->active_minutes_today++;
+        }
         else state->previous_minute_was_active = true;
+
+        // watch_disable_i2c();
     } else {
+        printf("Activity logging: inactive\n\r");
         state->previous_minute_was_active = false;
     }
 
