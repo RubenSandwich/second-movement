@@ -61,6 +61,5 @@
 #include "totp_face.h"
 #include "tally_face.h"
 #include "probability_face.h"
-#include "step_counter_face.h"
 #include "ke_decimal_time_face.h"
 // New includes go above this line.
