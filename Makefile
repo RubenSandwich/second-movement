@@ -72,6 +72,7 @@ INCLUDES += \
   -I./lib/base32 \
   -I./lib/TOTP \
   -I./lib/chirpy_tx \
+  -I./lib/pedometer \
   -I./lib/base64 \
   -I./watch-library/shared/watch \
   -I./watch-library/shared/driver \

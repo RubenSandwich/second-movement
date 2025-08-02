@@ -25,6 +25,7 @@
 #pragma once
 
 #include "movement.h"
+#include "pedometer.h"
 
 /*
  * A DESCRIPTION OF YOUR WATCH FACE
@@ -34,8 +35,7 @@
  */
 
 typedef struct {
-    // Anything you need to keep track of, put it here!
-    uint8_t unused;
+    pedometer_t *pedometer; // Pedometer instance to track steps
 } step_counter_state_t;
 
 void step_counter_face_setup(uint8_t watch_face_index, void ** context_ptr);

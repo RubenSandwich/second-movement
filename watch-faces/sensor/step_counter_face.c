@@ -25,15 +25,19 @@
 #include <stdlib.h>
 #include <string.h>
 #include "step_counter_face.h"
+#include "pedometer.h"
 
 void step_counter_face_setup(uint8_t watch_face_index, void ** context_ptr) {
     (void) watch_face_index;
     if (*context_ptr == NULL) {
         *context_ptr = malloc(sizeof(step_counter_state_t));
         memset(*context_ptr, 0, sizeof(step_counter_state_t));
-        // Do any one-time tasks in here; the inside of this conditional happens only at boot.
+
+        step_counter_state_t *state = (step_counter_state_t *)*context_ptr;
+        pedometer_t *pedometer = malloc(sizeof(pedometer_t));
+        pedometer_init(pedometer);
+        state->pedometer = pedometer;
     }
-    // Do any pin or peripheral setup here; this will be called whenever the watch wakes from deep sleep.
 }
 
 void step_counter_face_activate(void *context) {
