@@ -17,8 +17,8 @@ typedef struct {
     int32_t threshold[THRESHOLD_SIZE];        // 4 elements
     int32_t window[WINDOW_SIZE];              // 17 elements ((4 << 2) + 1 = 17)
     int8_t idx_window_min, idx_window_max, idx_threshold, idx_buffer, idx_average;
-    int8_t step_samples, regulation_mode, max_min_samples, possible_steps;
-    uint8_t flag_max, flag_threshold, flag_threshold_counter;
+    int8_t step_samples, max_min_samples, possible_steps;
+    uint8_t flag_max, flag_threshold, flag_threshold_counter, step_counting_mode;
     int32_t count_steps;
     uint32_t last_max, last_min, filter_mean;
     uint32_t buffer_dynamic_threshold, new_threshold, old_threshold;

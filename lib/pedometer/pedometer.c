@@ -109,7 +109,7 @@ int32_t pedometer_step(pedometer_t *p, int16_t x, int16_t y, int16_t z) {
           p->step_samples = 0;
           p->max_min_samples = 0;
 
-          if (p->regulation_mode)
+          if (p->step_counting_mode)
           {
             // the step is counted
             p->count_steps++;
@@ -123,7 +123,7 @@ int32_t pedometer_step(pedometer_t *p, int16_t x, int16_t y, int16_t z) {
             {
               p->count_steps = p->count_steps + p->possible_steps;
               p->possible_steps = 0;
-              p->regulation_mode = 1;
+              p->step_counting_mode = 1;
             }
           }
         }
@@ -139,7 +139,7 @@ int32_t pedometer_step(pedometer_t *p, int16_t x, int16_t y, int16_t z) {
         p->max_min_samples = 0;
         p->last_max = 0;
         p->last_min = 0;
-        p->regulation_mode = 0;
+        p->step_counting_mode = 0;
         p->possible_steps = 0;
         p->flag_threshold_counter = 0;
       }
@@ -178,11 +178,11 @@ int32_t pedometer_step(pedometer_t *p, int16_t x, int16_t y, int16_t z) {
     // If the pedometer takes 2 seconds without counting a step it resets all parameters
     p->step_samples = 0;
     p->possible_steps = 0;
-    p->regulation_mode = 0;
+    p->step_counting_mode = 0;
     p->max_min_samples = 0;
-    if (p->regulation_mode == 1)
+    if (p->step_counting_mode == 1)
     {
-      p->regulation_mode = 0;
+      p->step_counting_mode = 0;
       p->old_threshold = INIT_OFFSET_VALUE;
       p->buffer_dynamic_threshold = INIT_OFFSET_VALUE * THRESHOLD_SIZE;
       p->idx_threshold = 0;
