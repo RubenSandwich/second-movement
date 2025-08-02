@@ -2,6 +2,7 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include <inttypes.h>
+#include <stdbool.h>
 #include "pedometer.h"
 
 void pedometer_init(pedometer_t *p) {
@@ -54,12 +55,12 @@ int32_t pedometer_step(pedometer_t *p, int16_t x, int16_t y, int16_t z) {
   }
 
   /* MAX SEARCHING */
-  if (p->flag_max == 0)
+  if (!p->searching_for_max)
   {
     // Is the Window max in the midle of the window? If so mark it as a max
     if (p->idx_window_max == ((p->idx_buffer + (WINDOW_SIZE >> 1)) % WINDOW_SIZE))
     {
-      p->flag_max = 1;
+      p->searching_for_max = true;
       p->last_max = p->last_max;
       p->max_min_samples = 0;
     }
@@ -71,19 +72,19 @@ int32_t pedometer_step(pedometer_t *p, int16_t x, int16_t y, int16_t z) {
     {
       p->last_min = p->last_min;
       int32_t difference = p->last_max - p->last_min;
-      p->flag_max = 0;
+      p->searching_for_max = false;
       p->max_min_samples = 0;
 
       // Detect if the SENSITIVITYs are in of the Threshold level
       if ((p->last_max > (p->old_threshold + (SENSITIVITY >> 1))) && (p->last_min < (p->old_threshold - (SENSITIVITY >> 1))))
       {
         // Possible step detected, will be analyze later
-        p->flag_threshold = 1;
-        p->flag_threshold_counter = 0;
+        p->above_threshold = true;
+        p->above_threshold_counter = 0;
       }
       else
       {
-        p->flag_threshold_counter++;
+        p->above_threshold_counter++;
       }
 
       /* THRESHOLD LEVEL UPDATE */
@@ -102,17 +103,17 @@ int32_t pedometer_step(pedometer_t *p, int16_t x, int16_t y, int16_t z) {
         }
 
         /* STEP CERTIFICATION */
-        if (p->flag_threshold)
+        if (p->above_threshold)
         {
           // DETECTED STEP
-          p->flag_threshold = 0;
+          p->above_threshold = false;
           p->step_samples = 0;
           p->max_min_samples = 0;
 
           if (p->step_counting_mode)
           {
             // the step is counted
-            p->count_steps++;
+            p->counted_steps++;
           }
           else
           {
@@ -121,39 +122,37 @@ int32_t pedometer_step(pedometer_t *p, int16_t x, int16_t y, int16_t z) {
             // conclude that the person is walking
             if (p->possible_steps == 8)
             {
-              p->count_steps = p->count_steps + p->possible_steps;
+              p->counted_steps = p->counted_steps + p->possible_steps;
               p->possible_steps = 0;
-              p->step_counting_mode = 1;
+              p->step_counting_mode = true;
             }
           }
         }
       }
       p->last_min = INIT_VALUE_MIN;
 
-      // If the SENSITIVITYs are out of the Threshold Level 2 times consecutively with a good difference,
-      // Is very probably that the acceleration profile isn't a step sequence
-      // (Reset the possible steps to discard false steps)
-      if (p->flag_threshold_counter > 1)
+      // If the SENSITIVITYs are out of the Threshold Level 2 times consecutively
+      if (p->above_threshold_counter > 1)
       {
-        p->flag_threshold_counter = 0;
+        p->above_threshold_counter = 0;
         p->max_min_samples = 0;
         p->last_max = 0;
         p->last_min = 0;
-        p->step_counting_mode = 0;
+        p->step_counting_mode = false;
         p->possible_steps = 0;
-        p->flag_threshold_counter = 0;
+        p->above_threshold_counter = 0;
       }
     }
     else
     {
-      // Reset step detection if searching for minimum takes too long (>25 samples)
+      // Reset step detection if searching for minimum takes too long
       p->max_min_samples++;
       if (p->max_min_samples == _1_SECOND)
       {
         p->max_min_samples = 0;
         p->last_max = 0;
         p->last_min = 0;
-        p->flag_max = 0;
+        p->searching_for_max = false;
         p->possible_steps = 0;
       }
     }
@@ -178,15 +177,15 @@ int32_t pedometer_step(pedometer_t *p, int16_t x, int16_t y, int16_t z) {
     // If the pedometer takes 2 seconds without counting a step it resets all parameters
     p->step_samples = 0;
     p->possible_steps = 0;
-    p->step_counting_mode = 0;
+    p->step_counting_mode = false;
     p->max_min_samples = 0;
-    if (p->step_counting_mode == 1)
+    if (p->step_counting_mode)
     {
-      p->step_counting_mode = 0;
+      p->step_counting_mode = false;
       p->old_threshold = INIT_OFFSET_VALUE;
       p->buffer_dynamic_threshold = INIT_OFFSET_VALUE * THRESHOLD_SIZE;
       p->idx_threshold = 0;
-      p->flag_threshold_counter = 0;
+      p->above_threshold_counter = 0;
       for (int8_t i = 0; i < THRESHOLD_SIZE; i++)
       {
         p->threshold[i] = INIT_OFFSET_VALUE;
@@ -194,5 +193,5 @@ int32_t pedometer_step(pedometer_t *p, int16_t x, int16_t y, int16_t z) {
     }
   }
 
-  return p->count_steps;
+  return p->counted_steps;
 }

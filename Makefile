@@ -100,6 +100,7 @@ SRCS += \
   ./lib/TOTP/sha512.c \
   ./lib/TOTP/TOTP.c \
   ./lib/chirpy_tx/chirpy_tx.c \
+  ./lib/pedometer/pedometer.c \
   ./lib/base64/base64.c \
   ./watch-library/shared/driver/thermistor_driver.c \
   ./watch-library/shared/watch/watch_common_buzzer.c \
