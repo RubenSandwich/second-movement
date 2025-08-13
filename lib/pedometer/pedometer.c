@@ -17,6 +17,7 @@ void pedometer_init(pedometer_t *p) {
 int32_t pedometer_step(pedometer_t *p, int16_t x, int16_t y, int16_t z) {
   // Invalid pedometer instance
   if (p == NULL) {
+    printf("Pedometer instance is NULL, please initialize it before use.\n");
     return 0;
   }
 
@@ -31,26 +32,26 @@ int32_t pedometer_step(pedometer_t *p, int16_t x, int16_t y, int16_t z) {
 
   /* MAX AND MIN DETECTION  */
   p->last_max = p->window[0];
-  p->idx_window_max = 0;
+  uint8_t idx_window_max = 0;
   for (int8_t i = 0; i < WINDOW_SIZE; i++)
   {
 
     if (p->window[i] > p->last_max)
     {
       p->last_max = p->window[i];
-      p->idx_window_max = i;
+      idx_window_max = i;
     }
   }
 
   p->last_min = p->window[0];
-  p->idx_window_min = 0;
+  uint8_t idx_window_min = 0;
   for (int8_t i = 0; i < WINDOW_SIZE; i++)
   {
 
     if (p->window[i] < p->last_min)
     {
       p->last_min = p->window[i];
-      p->idx_window_min = i;
+      idx_window_min = i;
     }
   }
 
@@ -58,7 +59,7 @@ int32_t pedometer_step(pedometer_t *p, int16_t x, int16_t y, int16_t z) {
   if (!p->searching_for_max)
   {
     // Is the Window max in the midle of the window? If so mark it as a max
-    if (p->idx_window_max == ((p->idx_buffer + (WINDOW_SIZE >> 1)) % WINDOW_SIZE))
+    if (idx_window_max == ((p->idx_buffer + (WINDOW_SIZE >> 1)) % WINDOW_SIZE))
     {
       p->searching_for_max = true;
       p->last_max = p->last_max;
@@ -68,7 +69,7 @@ int32_t pedometer_step(pedometer_t *p, int16_t x, int16_t y, int16_t z) {
   else
   {
     // Is the Window min in the midle of the window? If so mark it as a min
-    if (p->idx_window_min == ((p->idx_buffer + (WINDOW_SIZE >> 1)) % WINDOW_SIZE))
+    if (idx_window_min == ((p->idx_buffer + (WINDOW_SIZE >> 1)) % WINDOW_SIZE))
     {
       p->last_min = p->last_min;
       int32_t difference = p->last_max - p->last_min;
@@ -147,7 +148,7 @@ int32_t pedometer_step(pedometer_t *p, int16_t x, int16_t y, int16_t z) {
     {
       // Reset step detection if searching for minimum takes too long
       p->max_min_samples++;
-      if (p->max_min_samples == _1_SECOND)
+      if (p->max_min_samples == ONE_SECOND)
       {
         p->max_min_samples = 0;
         p->last_max = 0;
@@ -172,7 +173,7 @@ int32_t pedometer_step(pedometer_t *p, int16_t x, int16_t y, int16_t z) {
   }
 
   p->step_samples++;
-  if (p->step_samples >= REGULATION_OFF_TIME)
+  if (p->step_samples >= STEP_COUNTING_TIMEOUT)
   {
     // If the pedometer takes 2 seconds without counting a step it resets all parameters
     p->step_samples = 0;

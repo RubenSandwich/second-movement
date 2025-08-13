@@ -4,8 +4,8 @@
 #pragma once
 
 /* PEDOMETER CONSTANTS */
-#define _1_SECOND 50 // ODR = 50Hz, 50 samples = 1 second
-#define REGULATION_OFF_TIME (_1_SECOND << 1) // 2s
+#define ONE_SECOND 50 // ODR = 50Hz, 50 samples = 1 second
+#define STEP_COUNTING_TIMEOUT (ONE_SECOND << 1) // 2s
 #define RAW_SIZE 4
 #define THRESHOLD_SIZE 4
 #define WINDOW_SIZE ((RAW_SIZE << 2) + 1)
@@ -17,7 +17,7 @@ typedef struct {
     int32_t raw[RAW_SIZE];                    // 4 elements
     int32_t threshold[THRESHOLD_SIZE];        // 4 elements
     int32_t window[WINDOW_SIZE];              // 17 elements ((4 << 2) + 1 = 17)
-    uint8_t idx_window_min, idx_window_max, idx_threshold, idx_buffer, idx_average;
+    uint8_t idx_threshold, idx_buffer, idx_average;
     uint8_t step_samples, max_min_samples, possible_steps, above_threshold_counter;
     bool searching_for_max, above_threshold, step_counting_mode;
     uint32_t counted_steps;
