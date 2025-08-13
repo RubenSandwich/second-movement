@@ -138,36 +138,11 @@ movement_watch_face_advisory_t activity_logging_face_advise(void *context) {
     movement_watch_face_advisory_t retval = { 0 };
 
     if (!HAL_GPIO_A4_read()) {
-
-        // watch_enable_i2c();
         // only count this as an active minute if the previous minute was also active.
         // otherwise, set the flag and we'll count the next minute if the wearer is still active.
-        printf("Activity logging: active minute detected\n\r");
-        lis2dw_fifo_t fifo;
-        lis2dw_read_fifo(&fifo);
-        if (fifo.count > 0) {
-            // we have a reading, so we are active
-            printf("Activity logging: %d readings in FIFO\n\r", fifo.count);
-            for (uint8_t i = 0; i < fifo.count; i++) {
-                printf("FIFO reading %d: x=%d, y=%d, z=%d\n\r",
-                    i,
-                    fifo.readings[i].x,
-                    fifo.readings[i].y,
-                    fifo.readings[i].z
-                );
-            }
-        } else {
-            // no readings, so we are not active
-            printf("Activity logging: no readings in FIFO\n\r");
-        }
-        if (state->previous_minute_was_active) {
-            state->active_minutes_today++;
-        }
+        if (state->previous_minute_was_active) state->active_minutes_today++;
         else state->previous_minute_was_active = true;
-
-        // watch_disable_i2c();
     } else {
-        printf("Activity logging: inactive\n\r");
         state->previous_minute_was_active = false;
     }
 
