@@ -3,10 +3,11 @@
 #include <stdlib.h>
 #include <inttypes.h>
 #include <stdbool.h>
+#include <string.h>
 #include "pedometer.h"
 
 void pedometer_init(pedometer_t *p) {
-    // memset(p, 0, sizeof(pedometer_t));
+    memset(p, 0, sizeof(pedometer_t));
     p->old_threshold = INIT_OFFSET_VALUE;
     p->buffer_dynamic_threshold = INIT_OFFSET_VALUE * THRESHOLD_SIZE;
 
@@ -123,7 +124,7 @@ int32_t pedometer_step(pedometer_t *p, int16_t x, int16_t y, int16_t z) {
             // conclude that the person is walking
             if (p->possible_steps == 8)
             {
-              p->counted_steps = p->counted_steps + p->possible_steps;
+              p->counted_steps += p->possible_steps;
               p->possible_steps = 0;
               p->step_counting_mode = true;
             }
@@ -178,7 +179,6 @@ int32_t pedometer_step(pedometer_t *p, int16_t x, int16_t y, int16_t z) {
     // If the pedometer takes 2 seconds without counting a step it resets all parameters
     p->step_samples = 0;
     p->possible_steps = 0;
-    p->step_counting_mode = false;
     p->max_min_samples = 0;
     if (p->step_counting_mode)
     {

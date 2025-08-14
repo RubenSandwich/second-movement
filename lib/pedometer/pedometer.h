@@ -4,7 +4,7 @@
 #pragma once
 
 /* PEDOMETER CONSTANTS */
-#define ONE_SECOND 50 // ODR = 50Hz, 50 samples = 1 second
+#define ONE_SECOND 25 // ODR
 #define STEP_COUNTING_TIMEOUT (ONE_SECOND << 1) // 2s
 #define RAW_SIZE 4
 #define THRESHOLD_SIZE 4

@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022 Joey Castillo
+ * Copyright (c) 2025 Ruben Nic
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -39,7 +39,7 @@ static void _step_counter_face_update_display(step_counter_state_t *state) {
         // if we are at today, just show the count so far
         snprintf(buf, 8, "%2d", timestamp.unit.day);
         watch_display_text(WATCH_POSITION_TOP_RIGHT, buf);
-        snprintf(buf, 8, "%5d  ", state->steps_today);
+        snprintf(buf, 8, "%4lu  ", state->pedometer->counted_steps);
         watch_display_text(WATCH_POSITION_BOTTOM, buf);
 
         // also indicate that this is the active day — we are still sensing active minutes!
@@ -62,7 +62,7 @@ static void _step_counter_face_update_display(step_counter_state_t *state) {
             watch_display_text(WATCH_POSITION_BOTTOM, "no dat");
         } else {
             // we are displaying the step for that day
-            snprintf(buf, 8, "%5d  ", state->activity_log[pos]);
+            snprintf(buf, 8, "%4lu  ", state->activity_log[pos]);
             watch_display_text(WATCH_POSITION_BOTTOM, buf);
         }
     }
@@ -74,15 +74,14 @@ void step_counter_face_setup(uint8_t watch_face_index, void ** context_ptr) {
         *context_ptr = malloc(sizeof(step_counter_state_t));
         memset(*context_ptr, 0, sizeof(step_counter_state_t));
         // At first run, tell Movement to run the accelerometer in the background. It will now run at this rate forever.
-        movement_set_accelerometer_background_rate(LIS2DW_DATA_RATE_50_HZ);
+        movement_set_accelerometer_background_rate(LIS2DW_DATA_RATE_25_HZ);
         lis2dw_enable_fifo();
+        lis2dw_clear_fifo();
 
         // Initialize the pedometer instance
         step_counter_state_t *state = (step_counter_state_t *)*context_ptr;
         state->pedometer = malloc(sizeof(pedometer_t));
         pedometer_init(state->pedometer);
-
-        state->steps_today = 0;
     }
 }
 
@@ -105,7 +104,10 @@ bool step_counter_face_loop(movement_event_t event, void *context) {
             break;
         case EVENT_TICK:
             {
-                if (movement_get_local_date_time().unit.second == 0 && state->display_index == 0) {
+                if (
+                    (movement_get_local_date_time().unit.second == 0 || movement_get_local_date_time().unit.second == 30 ) && state->display_index == 0
+                ) {
+                    printf("updating display\n\r");
                     _step_counter_face_update_display(state);
                 }
             }
@@ -113,9 +115,8 @@ bool step_counter_face_loop(movement_event_t event, void *context) {
         case EVENT_BACKGROUND_TASK:
             {
                 size_t pos = state->data_points % ACTIVITY_LOGGING_NUM_DAYS;
-                state->activity_log[pos] = state->steps_today;
+                state->activity_log[pos] = state->pedometer->counted_steps;
                 state->data_points++;
-                state->steps_today = 0;
 
                 // reset the pedometer for the next day
                 pedometer_init(state->pedometer);
@@ -151,14 +152,25 @@ movement_watch_face_advisory_t step_counter_face_advise(void *context) {
 
     lis2dw_read_fifo(&fifo);
     if (fifo.count > 0) {
+        printf("Activity logging: %d readings in FIFO\n\r", fifo.count);
+
+        uint32_t prev_steps = state->pedometer->counted_steps;
+
         // we have a reading, so we are active
         for (uint8_t i = 0; i < fifo.count; i++) {
-            state->steps_today = pedometer_step(
+            pedometer_step(
                 state->pedometer,
                 fifo.readings[i].x,
                 fifo.readings[i].y,
-                fifo.readings[i].z);
+                fifo.readings[i].z
+            );
         }
+
+        uint32_t new_steps = state->pedometer->counted_steps;
+        printf(
+            "Activity logging: %lu new steps detected\n\r",
+            new_steps - prev_steps
+        );
     }
 
     lis2dw_clear_fifo();

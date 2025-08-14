@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022 Joey Castillo
+ * Copyright (c) 2025 Ruben Nic
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,10 +24,8 @@
 
 #pragma once
 
-#include "pins.h"
-
 /*
- * ACTIVITY LOGGING
+ * STEP COUNTING AND LOGGING
  *
  * This watch face works with Movement's built-in tracking of accelerometer state to log activity over time.
  * The watch face shows the number of active minutes counted for each of the last 14 days. Layout:
@@ -50,10 +48,9 @@
 #define ACTIVITY_LOGGING_NUM_DAYS (14)
 
 typedef struct {
-    uint16_t activity_log[ACTIVITY_LOGGING_NUM_DAYS];   // the activity log
+    uint32_t activity_log[ACTIVITY_LOGGING_NUM_DAYS];   // the activity log
     uint16_t data_points;                               // the number of days logged
     uint8_t display_index;                              // the index we are displaying on screen
-    uint16_t steps_today;                               // the number of steps counted today
     pedometer_t *pedometer; // Pedometer instance to track steps
 } step_counter_state_t;
 
