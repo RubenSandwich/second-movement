@@ -51,7 +51,7 @@ static void _activity_logging_face_update_display(activity_logging_state_t *stat
         // get day of month for today - display_index
         uint32_t unixtime = watch_utility_date_time_to_unix_time(timestamp, movement_get_current_timezone_offset());
         unixtime -= 86400 * state->display_index;
-        timestamp = watch_utility_date_time_from_unix_time(unixtime, movement_get_current_timezone_offset());
+        timestamp = watch_utility_date_time_from_unix_time(unixtime, movement_get_current_timezone_offset());    
 
         // display date
         snprintf(buf, 8, "%2d", timestamp.unit.day);
