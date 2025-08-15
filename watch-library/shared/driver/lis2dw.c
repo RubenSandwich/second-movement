@@ -330,6 +330,20 @@ void lis2dw_disable_stationary_motion_detection(void) {
 #endif
 }
 
+void lis2dw_stationary_motion_detection_enable_switch_to_12Hz_ODR(void) {
+#ifdef I2C_SERCOM
+    uint8_t configuration = watch_i2c_read8(LIS2DW_ADDRESS, LIS2DW_REG_WAKE_UP_DUR);
+    watch_i2c_write8(LIS2DW_ADDRESS, LIS2DW_REG_WAKE_UP_DUR, configuration | LIS2DW_WAKE_UP_DUR_STATIONARY_DISABLE);
+#endif
+}
+
+void lis2dw_stationary_motion_detection_disable_switch_to_12Hz_ODR(void) {
+#ifdef I2C_SERCOM
+    uint8_t configuration = watch_i2c_read8(LIS2DW_ADDRESS, LIS2DW_REG_WAKE_UP_DUR);
+    watch_i2c_write8(LIS2DW_ADDRESS, LIS2DW_REG_WAKE_UP_DUR, configuration & ~LIS2DW_WAKE_UP_DUR_STATIONARY_DISABLE);
+#endif
+}
+
 void lis2dw_configure_wakeup_threshold(uint8_t threshold) {
 #ifdef I2C_SERCOM
     uint8_t configuration = watch_i2c_read8(LIS2DW_ADDRESS, LIS2DW_REG_WAKE_UP_THS) & 0b11000000;
