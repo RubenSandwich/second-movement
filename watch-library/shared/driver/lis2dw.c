@@ -271,6 +271,16 @@ inline void lis2dw_enable_fifo(void) {
 #endif
 }
 
+inline void lis2dw_set_fifo_mode(lis2dw_fifo_mode_t fifo_mode) {
+#ifdef I2C_SERCOM
+    watch_i2c_write8(
+        LIS2DW_ADDRESS,
+        LIS2DW_REG_FIFO_CTRL,
+        (fifo_mode << 5) | LIS2DW_FIFO_CTRL_FTH
+    );
+#endif
+}
+
 inline void lis2dw_disable_fifo(void) {
 #ifdef I2C_SERCOM
     watch_i2c_write8(LIS2DW_ADDRESS, LIS2DW_REG_FIFO_CTRL, LIS2DW_FIFO_CTRL_MODE_OFF);

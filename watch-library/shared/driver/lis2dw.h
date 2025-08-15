@@ -338,6 +338,8 @@ bool lis2dw_get_low_noise_mode(void);
 
 void lis2dw_enable_fifo(void);
 
+void lis2dw_set_fifo_mode(lis2dw_fifo_mode_t fifo_mode);
+
 void lis2dw_disable_fifo(void);
 
 bool lis2dw_read_fifo(lis2dw_fifo_t *fifo_data);
