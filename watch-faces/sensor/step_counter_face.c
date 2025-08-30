@@ -29,6 +29,8 @@
 #include "watch.h"
 #include "watch_utility.h"
 
+#include "lis2dw.h"
+
 static void _step_counter_face_update_display(step_counter_state_t *state) {
     char buf[8];
     watch_date_time_t timestamp = movement_get_local_date_time();
@@ -73,10 +75,12 @@ void step_counter_face_setup(uint8_t watch_face_index, void ** context_ptr) {
     if (*context_ptr == NULL) {
         *context_ptr = malloc(sizeof(step_counter_state_t));
         memset(*context_ptr, 0, sizeof(step_counter_state_t));
-        // At first run, tell Movement to run the accelerometer in the background. It will now run at this rate forever.
-        movement_set_accelerometer_background_rate(LIS2DW_DATA_RATE_25_HZ);
+
+        // lis2dw_stationary_motion_detection_enable_switch_to_12Hz_ODR();
+        lis2dw_set_data_rate(LIS2DW_DATA_RATE_LOWEST);
         lis2dw_enable_fifo();
         lis2dw_clear_fifo();
+        // lis2dw_set_fifo_mode(LIS2DW_FIFO_MODE_CONTINUOUS_TO_FIFO);
 
         // Initialize the pedometer instance
         step_counter_state_t *state = (step_counter_state_t *)*context_ptr;
@@ -151,63 +155,34 @@ movement_watch_face_advisory_t step_counter_face_advise(void *context) {
     lis2dw_fifo_t fifo;
 
     lis2dw_read_fifo(&fifo);
-    if (fifo.count > 0) {
-        printf("Activity logging: %d readings in FIFO\n\r", fifo.count);
+    printf("Activity logging: %d readings in FIFO\n\r", fifo.count);
 
-        uint32_t prev_steps = state->pedometer->counted_steps;
+    lis2dw_data_rate_t data_rate = lis2dw_get_data_rate();
+    printf("Activity logging: data rate is %d\n\r", data_rate);
 
-        // we have a reading, so we are active
-        for (uint8_t i = 0; i < fifo.count; i++) {
-            pedometer_step(
-                state->pedometer,
-                fifo.readings[i].x,
-                fifo.readings[i].y,
-                fifo.readings[i].z
-            );
-        }
+    // if (fifo.count > 0) {
+    //     printf("Activity logging: %d readings in FIFO\n\r", fifo.count);
 
-        uint32_t new_steps = state->pedometer->counted_steps;
-        printf(
-            "Activity logging: %lu new steps detected\n\r",
-            new_steps - prev_steps
-        );
-    }
+    //     uint32_t prev_steps = state->pedometer->counted_steps;
+
+    //     // we have a reading, so we are active
+    //     for (uint8_t i = 0; i < fifo.count; i++) {
+    //         pedometer_step(
+    //             state->pedometer,
+    //             fifo.readings[i].x,
+    //             fifo.readings[i].y,
+    //             fifo.readings[i].z
+    //         );
+    //     }
+
+    //     uint32_t new_steps = state->pedometer->counted_steps;
+    //     printf(
+    //         "Activity logging: %lu new steps detected\n\r",
+    //         new_steps - prev_steps
+    //     );
+    // }
 
     lis2dw_clear_fifo();
-
-    // if (!HAL_GPIO_A4_read()) {
-
-    //     // watch_enable_i2c();
-    //     // only count this as an active minute if the previous minute was also active.
-    //     // otherwise, set the flag and we'll count the next minute if the wearer is still active.
-    //     printf("Activity logging: active minute detected\n\r");
-    //     lis2dw_fifo_t fifo;
-    //     lis2dw_read_fifo(&fifo);
-    //     if (fifo.count > 0) {
-    //         // we have a reading, so we are active
-    //         printf("Activity logging: %d readings in FIFO\n\r", fifo.count);
-    //         for (uint8_t i = 0; i < fifo.count; i++) {
-    //             printf("FIFO reading %d: x=%d, y=%d, z=%d\n\r",
-    //                 i,
-    //                 fifo.readings[i].x,
-    //                 fifo.readings[i].y,
-    //                 fifo.readings[i].z
-    //             );
-    //         }
-    //     } else {
-    //         // no readings, so we are not active
-    //         printf("Activity logging: no readings in FIFO\n\r");
-    //     }
-    //     if (state->previous_minute_was_active) {
-    //         state->active_minutes_today++;
-    //     }
-    //     else state->previous_minute_was_active = true;
-
-    //     // watch_disable_i2c();
-    // } else {
-    //     printf("Activity logging: inactive\n\r");
-    //     state->previous_minute_was_active = false;
-    // }
 
     watch_date_time_t datetime = movement_get_local_date_time();
     // request a background task at midnight to shuffle the data into the log
