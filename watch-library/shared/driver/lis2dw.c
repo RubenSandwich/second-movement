@@ -271,6 +271,16 @@ inline void lis2dw_enable_fifo(void) {
 #endif
 }
 
+inline void lis2dw_set_fifo_mode(lis2dw_fifo_mode_t fifo_mode) {
+#ifdef I2C_SERCOM
+    watch_i2c_write8(
+        LIS2DW_ADDRESS,
+        LIS2DW_REG_FIFO_CTRL,
+        (fifo_mode << 5) | LIS2DW_FIFO_CTRL_FTH
+    );
+#endif
+}
+
 inline void lis2dw_disable_fifo(void) {
 #ifdef I2C_SERCOM
     watch_i2c_write8(LIS2DW_ADDRESS, LIS2DW_REG_FIFO_CTRL, LIS2DW_FIFO_CTRL_MODE_OFF);
@@ -327,6 +337,20 @@ void lis2dw_disable_stationary_motion_detection(void) {
 #ifdef I2C_SERCOM
     uint8_t configuration = watch_i2c_read8(LIS2DW_ADDRESS, LIS2DW_REG_WAKE_UP_DUR);
     watch_i2c_write8(LIS2DW_ADDRESS, LIS2DW_REG_WAKE_UP_DUR, configuration & ~LIS2DW_WAKE_UP_DUR_STATIONARY);
+#endif
+}
+
+void lis2dw_stationary_motion_detection_enable_switch_to_12Hz_ODR(void) {
+#ifdef I2C_SERCOM
+    uint8_t configuration = watch_i2c_read8(LIS2DW_ADDRESS, LIS2DW_REG_WAKE_UP_DUR);
+    watch_i2c_write8(LIS2DW_ADDRESS, LIS2DW_REG_WAKE_UP_DUR, configuration | LIS2DW_WAKE_UP_DUR_STATIONARY_DISABLE);
+#endif
+}
+
+void lis2dw_stationary_motion_detection_disable_switch_to_12Hz_ODR(void) {
+#ifdef I2C_SERCOM
+    uint8_t configuration = watch_i2c_read8(LIS2DW_ADDRESS, LIS2DW_REG_WAKE_UP_DUR);
+    watch_i2c_write8(LIS2DW_ADDRESS, LIS2DW_REG_WAKE_UP_DUR, configuration & ~LIS2DW_WAKE_UP_DUR_STATIONARY_DISABLE);
 #endif
 }
 

@@ -243,6 +243,7 @@ typedef enum {
 
 #define LIS2DW_REG_WAKE_UP_DUR 0x35
 #define LIS2DW_WAKE_UP_DUR_STATIONARY 0b00010000
+#define LIS2DW_WAKE_UP_DUR_STATIONARY_DISABLE 0b00000000
 
 #define LIS2DW_REG_FREE_FALL 0x36
 #define LIS2DW_REG_STATUS_DUP 0x37
@@ -337,6 +338,8 @@ bool lis2dw_get_low_noise_mode(void);
 
 void lis2dw_enable_fifo(void);
 
+void lis2dw_set_fifo_mode(lis2dw_fifo_mode_t fifo_mode);
+
 void lis2dw_disable_fifo(void);
 
 bool lis2dw_read_fifo(lis2dw_fifo_t *fifo_data);
@@ -350,6 +353,10 @@ void lis2dw_disable_sleep(void);
 void lis2dw_enable_stationary_motion_detection(void);
 
 void lis2dw_disable_stationary_motion_detection(void);
+
+void lis2dw_stationary_motion_detection_enable_switch_to_12Hz_ODR(void);\
+
+void lis2dw_stationary_motion_detection_disable_switch_to_12Hz_ODR(void);
 
 void lis2dw_enable_tap_detection(void);
 
